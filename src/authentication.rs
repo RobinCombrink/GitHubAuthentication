@@ -1,6 +1,6 @@
 use anyhow::{Context, Result};
 use secrecy::SecretString;
-use std::process::Command;
+use std::{io, process::Command};
 
 pub trait Authentication {
     fn get_token(&self) -> SecretString;
@@ -14,6 +14,8 @@ pub struct GitHubCliAuthentication {
 
 impl GitHubCliAuthentication {
     pub fn new(username: String) -> Result<Self> {
+        is_github_cli_on_path()?;
+
         let token = Self::get_github_token(&username)?;
         Ok(Self { token, username })
     }
@@ -78,6 +80,19 @@ impl Authentication for GitHubCliAuthentication {
 
     fn get_username(&self) -> String {
         self.username.clone()
+    }
+}
+
+fn is_github_cli_on_path() -> Result<bool> {
+    match Command::new("gh").spawn() {
+        Ok(_) => Ok(true),
+        Err(e) => {
+            if let io::ErrorKind::NotFound = e.kind() {
+                Ok(false)
+            } else {
+                Err(e).with_context(||format!("An unknown error has occured while checking if the `gh` command was available"))
+            }
+        }
     }
 }
 
