@@ -1,25 +1,23 @@
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result};
 use secrecy::SecretString;
-use std::{process::Command, sync::LazyLock};
+use std::process::Command;
 
 pub trait Authentication {
-    fn get_token(&self) -> Result<SecretString>;
+    fn get_token(&self) -> SecretString;
     fn get_username(&self) -> String;
 }
 
 pub struct GitHubCliAuthentication {
-    pub token: LazyLock<Result<SecretString>>,
+    pub token: SecretString,
     pub username: String,
 }
 
 impl GitHubCliAuthentication {
-    pub fn new(username: String) -> Self {
-        Self {
-            token: LazyLock::new(|| Self::get_github_token()),
-            username,
-        }
+    pub fn new(username: String) -> Result<Self> {
+        let token = Self::get_github_token(&username)?;
+        Ok(Self { token, username })
     }
-    pub fn switch_github_cli_user(user: &str) -> Result<()> {
+    fn switch_github_cli_user(user: &str) -> Result<()> {
         let args = vec![
             "gh".into(),
             "auth".into(),
@@ -41,7 +39,8 @@ impl GitHubCliAuthentication {
         Ok(())
     }
 
-    fn get_github_token() -> Result<SecretString> {
+    fn get_github_token(username: &str) -> Result<SecretString> {
+        Self::switch_github_cli_user(username)?;
         let args = vec![
             "/C".into(),
             "gh".to_string(),
@@ -73,13 +72,8 @@ impl GitHubCliAuthentication {
 }
 
 impl Authentication for GitHubCliAuthentication {
-    fn get_token(&self) -> Result<SecretString> {
-        let token_ref = self.token.as_ref();
-
-        match token_ref {
-            Ok(token) => Ok(token.clone()), // Assuming SecretString implements Clone
-            Err(err) => Err(anyhow!("Could not get token")).with_context(|| format!("{:#?}", err)), // Clone the context, not the error
-        }
+    fn get_token(&self) -> SecretString {
+        self.token.clone()
     }
 
     fn get_username(&self) -> String {
@@ -97,12 +91,7 @@ mod tests {
     fn gets_token_when_cli_installed() {
         let authentication = GitHubCliAuthentication::new("RobinCombrink".to_owned());
         assert!(
-            authentication
-                .token
-                .as_ref()
-                .is_ok_and(|token| { token.expose_secret().starts_with("gh") }),
-            "Failed token: {}",
-            &authentication.token.as_ref().unwrap().expose_secret()[0..6]
+            authentication.is_ok_and(|client| { client.token.expose_secret().starts_with("gh") }),
         )
     }
 }
