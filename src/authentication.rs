@@ -21,6 +21,7 @@ impl GitHubCliAuthentication {
     }
     fn switch_github_cli_user(user: &str) -> Result<()> {
         let args = vec![
+            "/C".into(),
             "gh".into(),
             "auth".into(),
             "switch".into(),
@@ -84,7 +85,7 @@ impl Authentication for GitHubCliAuthentication {
 }
 
 fn is_github_cli_on_path() -> Result<bool> {
-    match Command::new("gh").spawn() {
+    match Command::new("gh").output() {
         Ok(_) => Ok(true),
         Err(e) => {
             if let io::ErrorKind::NotFound = e.kind() {
