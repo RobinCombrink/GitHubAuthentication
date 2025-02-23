@@ -21,14 +21,12 @@ impl GitHubCliAuthentication {
     }
     fn switch_github_cli_user(user: &str) -> Result<()> {
         let args = vec![
-            "/C".into(),
-            "gh".into(),
             "auth".into(),
             "switch".into(),
             "--user".into(),
             format!("{user}"),
         ];
-        let shell_program = Self::get_shell_program();
+        let shell_program = Self::get_github_cli_command();
 
         Command::new(shell_program)
             .args(&args)
@@ -44,14 +42,9 @@ impl GitHubCliAuthentication {
 
     fn get_github_token(username: &str) -> Result<SecretString> {
         Self::switch_github_cli_user(username)?;
-        let args = vec![
-            "/C".into(),
-            "gh".to_string(),
-            "auth".to_string(),
-            "token".to_string(),
-        ];
+        let args = vec!["auth".to_string(), "token".to_string()];
 
-        let shell_program = Self::get_shell_program();
+        let shell_program = Self::get_github_cli_command();
 
         let output = Command::new(shell_program)
             .args(&args)
@@ -69,8 +62,8 @@ impl GitHubCliAuthentication {
             .to_owned()
             .into())
     }
-    fn get_shell_program() -> &'static str {
-        return "cmd";
+    fn get_github_cli_command() -> &'static str {
+        return "gh";
     }
 }
 
