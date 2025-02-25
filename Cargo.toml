@@ -1,5 +1,5 @@
 [package]
-name = "github-authentication"
+name = "github_authentication"
 version = "0.1.0"
 edition = "2021"
 
