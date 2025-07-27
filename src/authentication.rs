@@ -7,6 +7,7 @@ pub trait Authentication {
     fn get_username(&self) -> String;
 }
 
+#[derive(Debug, Clone)]
 pub struct GitHubCliAuthentication {
     pub token: SecretString,
     pub username: String,
@@ -39,7 +40,6 @@ impl GitHubCliAuthentication {
             })?;
         Ok(())
     }
-
     fn get_github_token(username: &str) -> Result<SecretString> {
         Self::switch_github_cli_user(username)?;
         let args = vec!["auth".to_string(), "token".to_string()];
