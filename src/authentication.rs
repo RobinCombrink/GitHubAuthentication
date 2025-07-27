@@ -34,8 +34,8 @@ impl GitHubCliAuthentication {
             .output()
             .with_context(|| {
                 format!(
-                    "Something went wrong executing the command: {:#?} in the program {}",
-                    args, shell_program
+                    "Something went wrong switching GitHub CLI user in the program {}",
+                    shell_program,
                 )
             })?;
         Ok(())
@@ -51,8 +51,8 @@ impl GitHubCliAuthentication {
             .output()
             .with_context(|| {
                 format!(
-                    "Something went wrong executing the command: {:#?} in the program {}",
-                    args, shell_program
+                    "Something went wrong getting GitHub token in the program {}",
+                    shell_program,
                 )
             })?;
 
