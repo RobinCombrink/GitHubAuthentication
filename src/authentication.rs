@@ -63,7 +63,7 @@ impl GitHubCliAuthentication {
             .into())
     }
     fn get_github_cli_command() -> &'static str {
-        return "gh";
+        "gh"
     }
     pub fn is_github_cli_on_path() -> Result<bool> {
         match Command::new("gh").output() {
@@ -72,7 +72,7 @@ impl GitHubCliAuthentication {
                 if let io::ErrorKind::NotFound = e.kind() {
                     Ok(false)
                 } else {
-                    Err(e).with_context(||format!("An unknown error has occured while checking if the `gh` command was available"))
+                    Err(e).with_context(|| "An unknown error has occured while checking if the `gh` command was available".to_string())
                 }
             }
         }
