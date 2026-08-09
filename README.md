@@ -1,24 +1,33 @@
 # GitHubAuthentication
 
-Reusable Rust crate for GitHub authentication via the GitHub CLI.
+Obtains a credential to act as a named GitHub account, from whichever source holds one.
 
 ## What it does
 
-Provides a trait-based authentication abstraction that retrieves GitHub tokens by delegating to the locally installed GitHub CLI (`gh`). Supports multi-account switching and wraps tokens in `secrecy::SecretString` to prevent accidental logging.
+Asks a credential source for a token valid to act as one named account, and answers with the
+token or with why it could not. Obtaining a credential changes nothing about the machine: the
+account is named on each request, so whichever account a source is otherwise pointed at is
+neither read nor moved.
+
+The GitHub command-line tool is the only source today. Further sources — a minted installation
+token, a device flow — land beside it as their own functions rather than beneath a shared trait,
+because they are asked in different terms and fail in different ways.
 
 ## Usage
 
 ```rust
-use github_authentication::authentication::{Authentication, GitHubCliAuthentication};
+use github_authentication::cli;
 
-let auth = GitHubCliAuthentication::new("username".to_string())?;
-let token = auth.get_token();
+let token = cli::token_for("Alice")?;
 ```
 
-Requires `gh` CLI installed and authenticated.
+Two refusals name an act a person performs: `Refusal::ToolAbsent` asks for the tool to be
+installed, and `Refusal::AccountUnheld` asks for a login as that account. Every other cause
+arrives as `Refusal::Failed` carrying its reason.
 
-## Design Decisions
+A token is a transparent wrapper over a `secrecy::SecretString` that cannot be constructed
+empty, and carries no expiry.
 
-- **Delegates to `gh` CLI rather than implementing OAuth flows**: Avoids managing client secrets and refresh tokens. Users already have `gh` authenticated locally.
-- **`secrecy::SecretString` for tokens**: Prevents tokens from appearing in debug output or logs.
-- **Trait-based**: `Authentication` trait allows swapping implementations in tests or for different auth providers.
+## Design decisions
+
+Recorded in [`docs/adr`](./docs/adr). The vocabulary is in [`CONTEXT.md`](./CONTEXT.md).
