@@ -10,10 +10,10 @@ pub fn token_for(account: &str) -> Result<GitHubToken, Refusal> {
 
 #[derive(Debug, Error)]
 pub enum Refusal {
-    #[error("the GitHub CLI (gh) is not on the path — install it from https://cli.github.com")]
+    #[error("the GitHub CLI (gh) is not on the path")]
     ToolAbsent,
 
-    #[error("the GitHub CLI holds no account named {account} — run `gh auth login` as {account}")]
+    #[error("the GitHub CLI holds no account named {account}")]
     AccountUnheld { account: String },
 
     #[error("the GitHub CLI could not produce a token for {account}: {reason}")]
@@ -140,7 +140,7 @@ mod tests {
 
         assert_eq!(
             refusal.to_string(),
-            "the GitHub CLI (gh) is not on the path — install it from https://cli.github.com"
+            "the GitHub CLI (gh) is not on the path"
         );
     }
 
@@ -152,7 +152,7 @@ mod tests {
 
         assert_eq!(
             refusal.to_string(),
-            "the GitHub CLI holds no account named Alice — run `gh auth login` as Alice"
+            "the GitHub CLI holds no account named Alice"
         );
     }
 

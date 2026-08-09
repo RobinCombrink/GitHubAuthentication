@@ -21,9 +21,10 @@ use github_authentication::cli;
 let token = cli::token_for("Alice")?;
 ```
 
-Two refusals name an act a person performs: `Refusal::ToolAbsent` asks for the tool to be
-installed, and `Refusal::AccountUnheld` asks for a login as that account. Every other cause
-arrives as `Refusal::Failed` carrying its reason.
+Two refusals are named because a caller acts differently on each: `Refusal::ToolAbsent` says the
+tool is not on the machine, and `Refusal::AccountUnheld` says it cannot answer for that account.
+Every other cause arrives as `Refusal::Failed` carrying its reason. What a person should do about
+either is the calling program's to say, not this crate's.
 
 A token is a transparent wrapper over a `secrecy::SecretString` that cannot be constructed
 empty, and carries no expiry.
